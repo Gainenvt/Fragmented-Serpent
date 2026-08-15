@@ -6,7 +6,6 @@ public class PlayerMovement : MonoBehaviour
     private PlayerInputActions input;
     private Rigidbody rb;
     private Player player;
-
     private Vector2 moveInput;
     private Vector2 lookInput;
 
@@ -31,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
         player = GetComponent<Player>();
     }
 
-
+//input system
     private void OnEnable()
     {
         if (input == null)
@@ -86,14 +85,10 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         Move();
-        SwimVertical();
+        
          
     }
 
-
-    // =========================
-    // INPUT
-    // =========================
 
     private void OnMove(InputAction.CallbackContext context)
     {
@@ -134,9 +129,7 @@ private void OnDescend(InputAction.CallbackContext context)
 }
 
 
-    // =========================
-    // MOVEMENT
-    // =========================
+  
 
 private void Move()
 {
@@ -155,17 +148,31 @@ private void Move()
             transform.forward * moveInput.y;
     }
 
+    float verticalVelocity = rb.linearVelocity.y;
+
+    if (player.isSubmerged)
+    {
+        verticalVelocity = movement.y * moveSPD;
+    }
+
+    if (isAscending)
+    {
+        verticalVelocity = swimSpd;
+    }
+    else if (isDescending)
+    {
+        verticalVelocity = -swimSpd;
+    }
+
     rb.linearVelocity = new Vector3(
         movement.x * moveSPD,
-        rb.linearVelocity.y,
+        verticalVelocity,
         movement.z * moveSPD
     );
 }
 
 
-    // =========================
-    // CAMERA
-    // =========================
+ 
 
     private void Look()
     {
@@ -207,32 +214,8 @@ private void Move()
     // DESCEND
     // =========================
 
- private void SwimVertical()
-{if (isAscending)
-{
-    rb.linearVelocity = new Vector3(
-        rb.linearVelocity.x,
-        swimSpd,
-        rb.linearVelocity.z
-    );
-}
-else if (isDescending)
-{ //underwater downward movement
-    rb.linearVelocity = new Vector3(
-        rb.linearVelocity.x,
-        -swimSpd,
-        rb.linearVelocity.z
-    );
-}
-else
-{
-    rb.linearVelocity = new Vector3(
-        rb.linearVelocity.x,
-        0f,
-        rb.linearVelocity.z
-    );
-}
-}
+ 
+
 //gravity Check
 
     private void Swimming()
