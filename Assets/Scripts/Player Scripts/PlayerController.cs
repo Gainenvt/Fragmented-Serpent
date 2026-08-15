@@ -4,12 +4,16 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     private PlayerInputActions input;
+
     private Rigidbody rb;
     private Player player;
-    private float swimSpd = 2f;
+
     private Vector2 moveInput;
     private Vector2 lookInput;
+
     private float xRotation = 0f;
+
+    private float swimSpd = 2f;
 
     public float JumpForce = 2f;
     public float moveSPD = 3f;
@@ -17,41 +21,38 @@ public class PlayerMovement : MonoBehaviour
 
     public Transform PlayerCamera;
 
+
     private void Awake()
     {
         input = new PlayerInputActions();
+
         rb = GetComponent<Rigidbody>();
         player = GetComponent<Player>();
     }
 
-   private void OnEnable()
-{
-    Debug.Log("OnEnable started");
-    Debug.Log("Input: " + input);
 
-    input.Enable();
+    private void OnEnable()
+    {
+        if (input == null)
+            input = new PlayerInputActions();
 
-    Debug.Log("Input enabled");
-    Debug.Log("Player map: " + input.Player);
+        input.Enable();
 
-    input.Player.Move.performed += OnMove;
-    input.Player.Move.canceled += OnMove;
+        input.Player.Move.performed += OnMove;
+        input.Player.Move.canceled += OnMove;
 
-    input.Player.Look.performed += OnLook;
-    input.Player.Look.canceled += OnLook;
-    input.Player.Jump.performed += OnJump;
-    input.Player.Descend.performed += OnDescend;
-    input.Player.Descend.canceled += OnDescend;
-}
+        input.Player.Look.performed += OnLook;
+        input.Player.Look.canceled += OnLook;
+
+        input.Player.Jump.performed += OnJump;
+    }
+
 
     private void OnDisable()
     {
-        Debug.Log("OnDisable started");
-        if(input == null)
-        {
-            Debug.Log("Input is null, skipping unsubscription");
+        if (input == null)
             return;
-        }
+
         input.Player.Move.performed -= OnMove;
         input.Player.Move.canceled -= OnMove;
 
@@ -59,16 +60,16 @@ public class PlayerMovement : MonoBehaviour
         input.Player.Look.canceled -= OnLook;
 
         input.Player.Jump.performed -= OnJump;
-        input.Player.Descend.performed -= OnDescend;
-        input.Player.Descend.canceled -= OnDescend;
 
         input.Disable();
     }
+
 
     private void FixedUpdate()
     {
         Move();
     }
+
 
     private void Update()
     {
@@ -76,24 +77,25 @@ public class PlayerMovement : MonoBehaviour
         Swimming();
     }
 
+
+
     private void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
     }
+
 
     private void OnLook(InputAction.CallbackContext context)
     {
         lookInput = context.ReadValue<Vector2>();
     }
 
+
     private void OnJump(InputAction.CallbackContext context)
     {
         Jump();
     }
-    private void OnDescend(InputAction.CallbackContext context)
-    {
-        Descend();
-    }
+
 
     private void Move()
     {
@@ -108,28 +110,77 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
+
+
     private void Look()
     {
-        transform.Rotate(Vector3.up * lookInput.x * LookSpeed * Time.deltaTime);
+        transform.Rotate(
+            Vector3.up *
+            lookInput.x *
+            LookSpeed *
+            Time.deltaTime
+        );
 
-        xRotation -= lookInput.y * LookSpeed * Time.deltaTime;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        xRotation -=
+            lookInput.y *
+            LookSpeed *
+            Time.deltaTime;
 
-        PlayerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        xRotation = Mathf.Clamp(
+            xRotation,
+            -90f,
+            90f
+        );
+
+        PlayerCamera.localRotation =
+            Quaternion.Euler(
+                xRotation,
+                0f,
+                0f
+            );
     }
+
 
     private void Jump()
     {
+        // Normal jumping while on land
+        if (!player.isSubmerged)
         {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, swimSpd, rb.linearVelocity.z);
+            rb.AddForce(
+                Vector3.up * JumpForce,
+                ForceMode.Impulse
+            );
         }
-
+        else
+        {
+            Ascend();
+        }
     }
+
+
+
+    private void Ascend()
+    {
+        rb.linearVelocity = new Vector3(
+            rb.linearVelocity.x,
+            swimSpd,
+            rb.linearVelocity.z
+        );
+    }
+
+
     private void Descend()
     {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, -swimSpd, rb.linearVelocity.z);
+        rb.linearVelocity = new Vector3(
+            rb.linearVelocity.x,
+            -swimSpd,
+            rb.linearVelocity.z
+        );
     }
+
+
  
+
     private void Swimming()
     {
         if (player.isSubmerged)

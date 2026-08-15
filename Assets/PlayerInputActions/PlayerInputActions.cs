@@ -116,7 +116,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""id"": ""bbb32fb8-a698-40fc-a0a6-1cfc66675c81"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
@@ -255,7 +255,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""8ec27ab7-ab38-42fa-8bf0-3856d26e4087"",
                     ""path"": ""<Keyboard>/ctrl"",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": ""Hold(duration=0.3)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Descend"",
