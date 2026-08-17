@@ -5,7 +5,6 @@ using UnityEngine;
 public class HostileAi : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private UnityEngine.AI.NavMeshAgent navAgent;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform firePoint;
     [SerializeField] private GameObject projectilePrefab;
@@ -48,10 +47,7 @@ public class HostileAi : MonoBehaviour
         }
     }
 
-    if (navAgent == null)
-    {
-        navAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-    }
+  
 
     rb = GetComponent<Rigidbody>();
 }
