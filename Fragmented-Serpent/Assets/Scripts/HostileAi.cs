@@ -1,12 +1,11 @@
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class HostileAi : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private NavMeshAgent navAgent;
+    [SerializeField] private UnityEngine.AI.NavMeshAgent navAgent;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform firePoint;
     [SerializeField] private GameObject projectilePrefab;
@@ -31,8 +30,11 @@ public class HostileAi : MonoBehaviour
     [SerializeField] private float visionRange = 20f;
     [SerializeField] private float engagementRange = 10f;
 
+    [Header("Move and Attack")]
+    [SerializeField] private float moveSpeed = 3f;
     private bool isPlayerVisible;
     private bool isPlayerInRange;
+    private Rigidbody rb;
 
    private void Awake()
 {
@@ -48,8 +50,10 @@ public class HostileAi : MonoBehaviour
 
     if (navAgent == null)
     {
-        navAgent = GetComponent<NavMeshAgent>();
+        navAgent = GetComponent<UnityEngine.AI.NavMeshAgent>();
     }
+
+    rb = GetComponent<Rigidbody>();
 }
 
 private void Update()
@@ -58,21 +62,20 @@ private void Update()
     UpdateBehaviourState();
 } 
     private void UpdateBehaviourState()
+{
+    if (!isPlayerVisible)
     {
-        if (!isPlayerVisible && !isPlayerInRange)
-        {
-            FindPatrolPath();
-        }
-        else if
-        (isPlayerVisible && !isPlayerInRange)
-        {
-            FetchHIM();
-        }
-        else if (isPlayerVisible && isPlayerInRange)
-        {
-            GunhimDOWN();
-        }
+        FindPatrolPath();
     }
+    else if (!isPlayerInRange)
+    {
+        FetchHIM();
+    }
+    else
+    {
+        GunhimDOWN();
+    }
+}
     
 
 
@@ -106,52 +109,43 @@ private void Update()
 
 
     private void FireProjectile()
-    {
-        if (projectilePrefab == null || firePoint == null)
-            return;
+{
+    if (projectilePrefab == null || firePoint == null)
+        return;
 
-        Rigidbody projectileRb = Instantiate(
-            projectilePrefab,
-            firePoint.position,
-            Quaternion.identity
-        ).GetComponent<Rigidbody>();
+    Rigidbody projectileRb = Instantiate(
+        projectilePrefab,
+        firePoint.position,
+        firePoint.rotation
+    ).GetComponent<Rigidbody>();
 
-        projectileRb.AddForce(
-            transform.forward * forwardShotForce,
-            ForceMode.Impulse
-        );
+    projectileRb.AddForce(
+        transform.forward * forwardShotForce,
+        ForceMode.Impulse
+    );
 
-        projectileRb.AddForce(
-            transform.up * verticalShotForce,
-            ForceMode.Impulse
-        );
+    projectileRb.AddForce(
+        transform.up * verticalShotForce,
+        ForceMode.Impulse
+    );
 
-        Destroy(projectileRb.gameObject, 3f);
-    }
-
+    Destroy(projectileRb.gameObject, 3f);
+}
 
     private void FindPatrolPoint()
-    {
-        float randomX = Random.Range(-patrolRadius, patrolRadius);
-        float randomZ = Random.Range(-patrolRadius, patrolRadius);
+{
+    float randomX = Random.Range(-patrolRadius, patrolRadius);
+    float randomY = Random.Range(-patrolRadius, patrolRadius);
+    float randomZ = Random.Range(-patrolRadius, patrolRadius);
 
-        Vector3 potentialPoint = new Vector3(
-            transform.position.x + randomX,
-            transform.position.y,
-            transform.position.z + randomZ
-        );
+    currentPatrolPoint = transform.position + new Vector3(
+        randomX,
+        randomY,
+        randomZ
+    );
 
-        if (Physics.Raycast(//change ths using raycast is not sutible for underwater movement
-            potentialPoint,
-            -transform.up,
-            2f,
-            Terrain
-        ))
-        {
-            currentPatrolPoint = potentialPoint;
-            hasPatrolPoint = true;
-        }
-    }
+    hasPatrolPoint = true;
+}
 
     private IEnumerator AttackcooldownRoutine()
     {
@@ -160,45 +154,50 @@ private void Update()
         isOnAttackCooldown = false;
     }
 
-    private void FindPatrolPath()
+   private void FindPatrolPath()
 {
-    if (!navAgent.isOnNavMesh)
-        return;
-
     if (!hasPatrolPoint)
+    {
         FindPatrolPoint();
+    }
 
-    if (hasPatrolPoint)
-        navAgent.SetDestination(currentPatrolPoint);
+    Vector3 direction = (currentPatrolPoint - transform.position).normalized;
+
+    rb.linearVelocity = direction * moveSpeed;
 
     if (Vector3.Distance(transform.position, currentPatrolPoint) < 1f)
-        hasPatrolPoint = false;
-}
-
-    private void FetchHIM()
-{
-    if (playerTransform != null && navAgent.isOnNavMesh)
     {
-        navAgent.SetDestination(playerTransform.position);
+        hasPatrolPoint = false;
+        rb.linearVelocity = Vector3.zero;
+    }
+}
+   private void FetchHIM()
+{
+    if (playerTransform != null)
+    {
+        Vector3 direction =
+            (playerTransform.position - transform.position).normalized;
+
+        rb.linearVelocity = direction * moveSpeed;
     }
 }
     
     private void GunhimDOWN()
 {
-    if (!navAgent.isOnNavMesh)
-        return;
-
-    navAgent.SetDestination(transform.position);
-
-    if (playerTransform != null)
+    if (isPlayerInRange)
     {
-        transform.LookAt(playerTransform);
-    }
+        rb.linearVelocity = Vector3.zero;
 
-    if (!isOnAttackCooldown)
-    {
-        FireProjectile();
-        StartCoroutine(AttackcooldownRoutine());
+        if (playerTransform != null)
+        {
+            transform.LookAt(playerTransform);
+        }
+
+        if (!isOnAttackCooldown)
+        {
+            FireProjectile();
+            StartCoroutine(AttackcooldownRoutine());
+        }
     }
 }
 
