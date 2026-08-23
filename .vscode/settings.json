@@ -67,9 +67,9 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "FragementedSerpaint.slnx",
+    "dotnet.defaultSolution": "Fragmented-Serpent.slnx",
     "csharp-dev-tools.solutionViewer.selectedWorkspaceSolutions": [
-        "dadp.slnx",
-        "DIGA.slnx"
+        "FragementedSerpaint.slnx",
+        "Fragmented-Serpent.slnx"
     ]
 }

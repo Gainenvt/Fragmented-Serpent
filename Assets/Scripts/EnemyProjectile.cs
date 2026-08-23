@@ -29,19 +29,23 @@ public class EnemyProjectile : MonoBehaviour
     }
     private bool isPlayerHit = false;
     private void OnTriggerEnter(Collider other)
+{
+    if (isPlayerHit) return;
+
+    Player player = other.GetComponent<Player>();
+    Rigidbody rb = other.GetComponent<Rigidbody>();
+
+    if (player != null)
     {
-        if (isPlayerHit) return;
-        {
-            Player player = GetComponent<Player>();
+        isPlayerHit = true;
 
-            if (player != null)
-            {
-                isPlayerHit = true;
+        player.HP -= damage;
 
-                player.HP -= damage;
-            }
-        }
-        Debug.Log("isPlayer" + isPlayerHit);
+        Debug.Log("Player hit! HP: " + player.HP);
+    }
+
+    Debug.Log("Hit object " + other.gameObject.name);
+}
 
     }
-}
+
