@@ -15,12 +15,21 @@ public class PlayerMovement : MonoBehaviour
     private bool isDescending;
     private bool isAscending;
 
+
+
     // GRAB SYSTEM
 
-    private GameObject selectedObject;
+    // GRAB SYSTEM
 
-    public float grabHeight = 0.25f;
+private GameObject selectedObject;
 
+public float grabHeight = 0.25f;
+
+private float grabDistance;
+
+public float scrollSpeed = 2f;
+public float minGrabDistance = 1f;
+public float maxGrabDistance = 10f;
    
     // MOVEMENT SETTINGS
     
@@ -118,6 +127,8 @@ public class PlayerMovement : MonoBehaviour
         Look();
         Swimming();
         GrabObject();
+        ScrollGrabbedObject();
+
     }
 
     private void FixedUpdate()
@@ -222,6 +233,11 @@ public class PlayerMovement : MonoBehaviour
 
                 selectedObject = hit.collider.gameObject;
 
+            
+            grabDistance = Vector3.Distance(
+            camera.transform.position,
+            selectedObject.transform.position);
+
                 Cursor.visible = false;
             }
         }
@@ -248,35 +264,29 @@ public class PlayerMovement : MonoBehaviour
     // GRAB MOVEMENT
 
     private void GrabObject()
+{
+    if (selectedObject == null)
     {
-        if (selectedObject == null)
-        {
-            return;
-        }
-
-        Camera camera = PlayerCamera.GetComponent<Camera>();
-
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
-
-        Vector3 screenPosition = new Vector3(
-            mousePosition.x,
-            mousePosition.y,
-            camera.WorldToScreenPoint(
-                selectedObject.transform.position
-            ).z
-        );
-
-        Vector3 worldPosition =
-            camera.ScreenToWorldPoint(screenPosition);
-
-        selectedObject.transform.position = new Vector3(
-            worldPosition.x,
-            grabHeight,
-            worldPosition.z
-        );
+        return;
     }
 
-    // MOVEMENT
+    Camera camera = PlayerCamera.GetComponent<Camera>();
+
+    Vector2 mousePosition = Mouse.current.position.ReadValue();
+
+    Ray ray = camera.ScreenPointToRay(mousePosition);
+
+    Vector3 worldPosition =
+        ray.GetPoint(grabDistance);
+
+    selectedObject.transform.position = new Vector3(
+        worldPosition.x,
+        grabHeight,
+        worldPosition.z
+    );
+}
+
+    // Move
 
     private void Move()
     {
@@ -361,4 +371,22 @@ public class PlayerMovement : MonoBehaviour
             rb.useGravity = true;
         }
     }
+
+    private void ScrollGrabbedObject()
+{
+    if (selectedObject == null)
+    {
+        return;
+    }
+
+    float scroll = Mouse.current.scroll.ReadValue().y;
+
+    grabDistance -= scroll * scrollSpeed * Time.deltaTime;
+
+    grabDistance = Mathf.Clamp(
+        grabDistance,
+        minGrabDistance,
+        maxGrabDistance
+    );
+}
 }
