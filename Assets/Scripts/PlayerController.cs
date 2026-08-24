@@ -6,21 +6,46 @@ public class PlayerMovement : MonoBehaviour
     private PlayerInputActions input;
     private Rigidbody rb;
     private Player player;
+
     private Vector2 moveInput;
     private Vector2 lookInput;
 
     private float xRotation = 0f;
 
     private bool isDescending;
+    private bool isAscending;
+
+    // GRAB SYSTEM
+
+    private GameObject selectedObject;
+
+    public float grabHeight = 0.25f;
+
+   
+    // MOVEMENT SETTINGS
     
 
     public float JumpForce = 2f;
     public float moveSPD = 3f;
     public float swimSpd = 2f;
-    public float LookSpeed = 10f;
-    private bool isAscending;
+
+    
+    // LOOK SETTINGS
+   
+
+    public float LookSpeed = 15f;
+    public float ControllerLookSPD = 100f;
+
+    private float currentLookSpeed;
+
+    // Refs
+
     public Transform PlayerCamera;
 
+    public GameObject projectilePrefab;
+    public Transform spawnPoint;
+
+    // INITIALIZATION 
 
     private void Awake()
     {
@@ -28,9 +53,12 @@ public class PlayerMovement : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         player = GetComponent<Player>();
+
+        currentLookSpeed = LookSpeed;
     }
 
-//input system
+    // INPUT SYSTEM
+
     private void OnEnable()
     {
         if (input == null)
@@ -51,8 +79,12 @@ public class PlayerMovement : MonoBehaviour
 
         input.Player.Descend.performed += OnDescend;
         input.Player.Descend.canceled += OnDescend;
-    }
 
+        input.Player.SpearATK.performed += OnSpearATK;
+
+        input.Player.Grab.performed += OnGrab;
+        input.Player.RotateGrabbed.performed += OnRotateGrabbed;
+    }
 
     private void OnDisable()
     {
@@ -71,121 +103,235 @@ public class PlayerMovement : MonoBehaviour
         input.Player.Descend.performed -= OnDescend;
         input.Player.Descend.canceled -= OnDescend;
 
+        input.Player.SpearATK.performed -= OnSpearATK;
+
+        input.Player.Grab.performed -= OnGrab;
+        input.Player.RotateGrabbed.performed -= OnRotateGrabbed;
+
         input.Disable();
     }
 
+    // UPDATE
 
     private void Update()
     {
         Look();
         Swimming();
+        GrabObject();
     }
-
 
     private void FixedUpdate()
     {
         Move();
-        
-         
     }
 
+    // MOVEMENT INPUT
 
     private void OnMove(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
     }
 
+    // LOOK INPUT
 
     private void OnLook(InputAction.CallbackContext context)
     {
         lookInput = context.ReadValue<Vector2>();
+
+        if (context.control.device is Mouse)
+        {
+            currentLookSpeed = LookSpeed;
+        }
+        else if (context.control.device is Gamepad)
+        {
+            currentLookSpeed = ControllerLookSPD;
+        }
     }
 
+    // JUMP INPUT
 
- private void OnJump(InputAction.CallbackContext context)
-{
-    if (context.performed)
+    private void OnJump(InputAction.CallbackContext context)
     {
-        isAscending = true;
+        if (context.performed)
+        {
+            isAscending = true;
+        }
+
+        if (context.canceled)
+        {
+            isAscending = false;
+        }
     }
 
-    if (context.canceled)
+    // DESCEND INPUT
+
+    private void OnDescend(InputAction.CallbackContext context)
     {
-        isAscending = false;
+        if (context.performed)
+        {
+            isDescending = true;
+        }
+
+        if (context.canceled)
+        {
+            isDescending = false;
+        }
     }
-}
 
-private void OnDescend(InputAction.CallbackContext context)
-{   
-    if(context.performed)
+    // SPEAR ATTACK
 
+    private void OnSpearATK(InputAction.CallbackContext context)
     {
-        isDescending = true;
+        if (context.performed)
+        {
+            GameObject projectile = Instantiate(
+                projectilePrefab,
+                spawnPoint.position,
+                spawnPoint.rotation
+            );
+
+            SpearATK(projectile);
+        }
     }
-    if(context.canceled)
+
+    private void SpearATK(GameObject projectile)
     {
-        isDescending = false;
+        Rigidbody rb = projectile.GetComponent<Rigidbody>();
+
+        rb.linearVelocity = spawnPoint.forward * 10f;
     }
-}
 
+    // GRAB INPUT
 
-  
-
-private void Move()
-{
-    Vector3 movement;
-
-    if (player.isSubmerged)
+    private void OnGrab(InputAction.CallbackContext context)
     {
-        movement =
-            PlayerCamera.right * moveInput.x +
-            PlayerCamera.forward * moveInput.y;
+        if (selectedObject == null)
+        {
+            Camera camera = PlayerCamera.GetComponent<Camera>();
+
+            Ray ray = camera.ScreenPointToRay(
+                Mouse.current.position.ReadValue()
+            );
+
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                if (!hit.collider.CompareTag("drag"))
+                {
+                    return;
+                }
+
+                selectedObject = hit.collider.gameObject;
+
+                Cursor.visible = false;
+            }
+        }
+        else
+        {
+            selectedObject = null;
+
+            Cursor.visible = true;
+        }
     }
-    else
+
+    private void OnRotateGrabbed(InputAction.CallbackContext context)
     {
-        movement =
-            transform.right * moveInput.x +
-            transform.forward * moveInput.y;
+        if (selectedObject != null)
+        {
+            selectedObject.transform.Rotate(
+                0f,
+                90f,
+                0f
+            );
+        }
     }
 
-    float verticalVelocity = rb.linearVelocity.y;
+    // GRAB MOVEMENT
 
-    if (player.isSubmerged)
+    private void GrabObject()
     {
-        verticalVelocity = movement.y * moveSPD;
+        if (selectedObject == null)
+        {
+            return;
+        }
+
+        Camera camera = PlayerCamera.GetComponent<Camera>();
+
+        Vector2 mousePosition = Mouse.current.position.ReadValue();
+
+        Vector3 screenPosition = new Vector3(
+            mousePosition.x,
+            mousePosition.y,
+            camera.WorldToScreenPoint(
+                selectedObject.transform.position
+            ).z
+        );
+
+        Vector3 worldPosition =
+            camera.ScreenToWorldPoint(screenPosition);
+
+        selectedObject.transform.position = new Vector3(
+            worldPosition.x,
+            grabHeight,
+            worldPosition.z
+        );
     }
 
-    if (isAscending)
+    // MOVEMENT
+
+    private void Move()
     {
-        verticalVelocity = swimSpd;
+        Vector3 movement;
+
+        if (player.isSubmerged)
+        {
+            movement =
+                PlayerCamera.right * moveInput.x +
+                PlayerCamera.forward * moveInput.y;
+        }
+        else
+        {
+            movement =
+                transform.right * moveInput.x +
+                transform.forward * moveInput.y;
+        }
+
+        float verticalVelocity = rb.linearVelocity.y;
+
+        if (player.isSubmerged)
+        {
+            verticalVelocity = movement.y * moveSPD;
+        }
+
+        if (isAscending)
+        {
+            verticalVelocity = swimSpd;
+        }
+        else if (isDescending)
+        {
+            verticalVelocity = -swimSpd;
+        }
+
+        rb.linearVelocity = new Vector3(
+            movement.x * moveSPD,
+            verticalVelocity,
+            movement.z * moveSPD
+        );
     }
-    else if (isDescending)
-    {
-        verticalVelocity = -swimSpd;
-    }
 
-    rb.linearVelocity = new Vector3(
-        movement.x * moveSPD,
-        verticalVelocity,
-        movement.z * moveSPD
-    );
-}
-
-
- 
+    // LOOK
 
     private void Look()
     {
         transform.Rotate(
             Vector3.up *
             lookInput.x *
-            LookSpeed *
+            currentLookSpeed *
             Time.deltaTime
         );
 
         xRotation -=
             lookInput.y *
-            LookSpeed *
+            currentLookSpeed *
             Time.deltaTime;
 
         xRotation = Mathf.Clamp(
@@ -202,21 +348,7 @@ private void Move()
             );
     }
 
-
-    // =========================
-    // ASCEND
-    // =========================
-
-    
-
-
-    // =========================
-    // DESCEND
-    // =========================
-
- 
-
-//gravity Check
+    // SWIMMING
 
     private void Swimming()
     {
@@ -230,4 +362,3 @@ private void Move()
         }
     }
 }
-
