@@ -6,7 +6,7 @@ public class EnemyProjectile : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public float moveSpeed = 10f;
-    public int damage = 10;
+    public float damage = 10f;
     public float lifetime = 5f;
     public Player player;
 
@@ -39,9 +39,9 @@ public class EnemyProjectile : MonoBehaviour
     {
         isPlayerHit = true;
 
-        player.CurrentHP -= damage;
+        player.HP -= damage;
 
-        Debug.Log("Player hit! HP: " + player.CurrentHP);
+        Debug.Log("Player hit! HP: " + player.HP);
     }
 
     Debug.Log("Hit object " + other.gameObject.name);
