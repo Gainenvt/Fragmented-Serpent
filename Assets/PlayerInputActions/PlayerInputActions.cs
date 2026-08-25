@@ -127,6 +127,33 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SpearATK"",
+                    ""type"": ""Button"",
+                    ""id"": ""64405ec3-49b5-4bbe-8afd-5877eb1ef0fa"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Grab"",
+                    ""type"": ""Button"",
+                    ""id"": ""d51d0f8b-3445-4325-bd23-e4215e9ac07d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RotateGrabbed"",
+                    ""type"": ""Button"",
+                    ""id"": ""40d56d96-ce69-47a7-b2fb-a723acd789fc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -244,7 +271,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""beeee991-18af-4186-bcc7-2e02dbaf862a"",
                     ""path"": ""<Gamepad>/buttonSouth"",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold(duration=0.2)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Jump"",
@@ -265,11 +292,77 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""923d4eb6-abec-49db-bb62-1951281f55f8"",
-                    ""path"": ""<Joystick>/stick/down"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Descend"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d31abb9e-e177-45ff-bb4e-750c9efb3f1b"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpearATK"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0df12549-810b-4379-b952-029e6144f4b5"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SpearATK"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8d1eee9b-f7c3-4542-a371-54e725fbe0d0"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Grab"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5d18dbe8-e3ea-4fab-8262-bf661cef2858"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Grab"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e16cb36f-b061-41c1-a68e-53553d58843e"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RotateGrabbed"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1bc3ff95-502a-4d70-b18f-85079ae40f81"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RotateGrabbed"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -284,6 +377,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Descend = m_Player.FindAction("Descend", throwIfNotFound: true);
+        m_Player_SpearATK = m_Player.FindAction("SpearATK", throwIfNotFound: true);
+        m_Player_Grab = m_Player.FindAction("Grab", throwIfNotFound: true);
+        m_Player_RotateGrabbed = m_Player.FindAction("RotateGrabbed", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -368,6 +464,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Descend;
+    private readonly InputAction m_Player_SpearATK;
+    private readonly InputAction m_Player_Grab;
+    private readonly InputAction m_Player_RotateGrabbed;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -395,6 +494,18 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Descend".
         /// </summary>
         public InputAction @Descend => m_Wrapper.m_Player_Descend;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/SpearATK".
+        /// </summary>
+        public InputAction @SpearATK => m_Wrapper.m_Player_SpearATK;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Grab".
+        /// </summary>
+        public InputAction @Grab => m_Wrapper.m_Player_Grab;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/RotateGrabbed".
+        /// </summary>
+        public InputAction @RotateGrabbed => m_Wrapper.m_Player_RotateGrabbed;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -433,6 +544,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Descend.started += instance.OnDescend;
             @Descend.performed += instance.OnDescend;
             @Descend.canceled += instance.OnDescend;
+            @SpearATK.started += instance.OnSpearATK;
+            @SpearATK.performed += instance.OnSpearATK;
+            @SpearATK.canceled += instance.OnSpearATK;
+            @Grab.started += instance.OnGrab;
+            @Grab.performed += instance.OnGrab;
+            @Grab.canceled += instance.OnGrab;
+            @RotateGrabbed.started += instance.OnRotateGrabbed;
+            @RotateGrabbed.performed += instance.OnRotateGrabbed;
+            @RotateGrabbed.canceled += instance.OnRotateGrabbed;
         }
 
         /// <summary>
@@ -456,6 +576,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Descend.started -= instance.OnDescend;
             @Descend.performed -= instance.OnDescend;
             @Descend.canceled -= instance.OnDescend;
+            @SpearATK.started -= instance.OnSpearATK;
+            @SpearATK.performed -= instance.OnSpearATK;
+            @SpearATK.canceled -= instance.OnSpearATK;
+            @Grab.started -= instance.OnGrab;
+            @Grab.performed -= instance.OnGrab;
+            @Grab.canceled -= instance.OnGrab;
+            @RotateGrabbed.started -= instance.OnRotateGrabbed;
+            @RotateGrabbed.performed -= instance.OnRotateGrabbed;
+            @RotateGrabbed.canceled -= instance.OnRotateGrabbed;
         }
 
         /// <summary>
@@ -524,5 +653,26 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDescend(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SpearATK" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSpearATK(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Grab" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnGrab(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RotateGrabbed" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRotateGrabbed(InputAction.CallbackContext context);
     }
 }
