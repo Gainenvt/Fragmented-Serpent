@@ -39,9 +39,9 @@ public class EnemyProjectile : MonoBehaviour
     {
         isPlayerHit = true;
 
-        player.HP -= damage;
+        player.CurrentHP -= (int)damage;
 
-        Debug.Log("Player hit! HP: " + player.HP);
+        Debug.Log("Player hit! HP: " + player.CurrentHP);
     }
 
     Debug.Log("Hit object " + other.gameObject.name);
