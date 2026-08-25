@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    
     private PlayerInputActions input;
     private Rigidbody rb;
     private Player player;
@@ -30,6 +31,8 @@ private float grabDistance;
 public float scrollSpeed = 2f;
 public float minGrabDistance = 1f;
 public float maxGrabDistance = 10f;
+[SerializeField] private float verticalOffset = 0f;
+
    
     // MOVEMENT SETTINGS
     
@@ -263,7 +266,7 @@ public float maxGrabDistance = 10f;
 
     // GRAB MOVEMENT
 
-    private void GrabObject()
+   private void GrabObject()
 {
     if (selectedObject == null)
     {
@@ -272,18 +275,15 @@ public float maxGrabDistance = 10f;
 
     Camera camera = PlayerCamera.GetComponent<Camera>();
 
-    Vector2 mousePosition = Mouse.current.position.ReadValue();
+    // Mouse wheel adjusts its position above/below the camera's center.
+    verticalOffset += Mouse.current.scroll.ReadValue().y * scrollSpeed;
 
-    Ray ray = camera.ScreenPointToRay(mousePosition);
+    Vector3 heldPosition =
+        camera.transform.position +
+        camera.transform.forward * grabDistance +
+        camera.transform.up * verticalOffset;
 
-    Vector3 worldPosition =
-        ray.GetPoint(grabDistance);
-
-    selectedObject.transform.position = new Vector3(
-        worldPosition.x,
-        grabHeight,
-        worldPosition.z
-    );
+    selectedObject.transform.position = heldPosition;
 }
 
     // Move
