@@ -2,32 +2,70 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float HP = 100f;
-    public bool isSubmerged = false;
+    public int MaxHP = 100;
+    public int MinHP = 0;
 
-    private void Update()
-    {
-       
-    }
+    public bool isSubmerged = false;
+    public int CurrentHP;
+    public bool isPlayerHit = false;
+    public bool isPlayerDead = false;
+
+    [SerializeField] private GameObject deathScreen;
+
 
     void Start()
-    {        
-        Debug.Log("mouse removed");
+    {
+        CurrentHP = MaxHP;
         LockCursor();
-        
+
+        deathScreen.SetActive(false);
     }
-    // Update is called once per frame
-     void  LockCursor()
+
+
+    void Update()
+    {
+        if (CurrentHP <= MinHP && !isPlayerDead)
+        {
+            Dead();
+        }
+    }
+
+
+    void LockCursor()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;//remove coursor from vieew
+        Cursor.visible = false;
     }
-     void UnlockCursor()
+
+
+    void UnlockCursor()
     {
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;//Unhide Cursor 
+        Cursor.visible = true;
     }
-    
-    
 
+
+    private void Death(int amount)
+    {
+        if (isPlayerDead) return;
+
+        CurrentHP -= amount;
+
+        // Min hp cap
+        CurrentHP = Mathf.Max(CurrentHP, MinHP);
+
+        Debug.Log("Player Health: " + CurrentHP);
+    }
+
+
+    private void Dead()
+    {
+        isPlayerDead = true;
+
+        Debug.Log("Player has died!");
+
+        UnlockCursor();
+
+        deathScreen.SetActive(true);
+    }
 }

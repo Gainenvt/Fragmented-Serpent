@@ -2,57 +2,51 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public float HP = 100f;
-    public float attackRange = 2f;
-    public float chaseRange = 30f;
-    public float movespeed = 3f;
-    private Rigidbody rb;
-    private Player player;
+    public int MaxHP = 100;
+    public int MinHP = 0;
+
     public bool isSubmerged = false;
+    public int CurrentHP;
+    public bool isEnemyHit = false;
+
+    public bool isEnemyDead = false;
 
 
-    private void Awake()
+    void Start()
     {
-        // Initialization code here
-        
-        rb = GetComponent<Rigidbody>();
-        player = GameObject.FindWithTag("Player").GetComponent<Player>();
-    }
-    private void Start()
-    {
-        // Initialization code here
-    }
-    private void FixedUpdate()
-    {
-        chasePlayer();
+        CurrentHP = MaxHP;
     }
 
-   
-    private void chasePlayer()
+
+    void Update()
+    {
+        if (CurrentHP <= MinHP && !isEnemyDead)
+        {
+            isEnemyDead = true;
+        }
+        Dead();
+    }
+
+
+    private void Death(int amount)
+    {
+        if (isEnemyDead) return;
+
+        CurrentHP -= amount;
+
+        // Prevent HP from going below MinHP
+        CurrentHP = Mathf.Max(CurrentHP, MinHP);
+
+        Debug.Log("Enemy Health: " + CurrentHP);
+    }
+
+
+private void Dead()
 {
-    Vector3 direction = player.transform.position - transform.position;
-
-    float distanceToPlayer = direction.magnitude;
-
-    if (distanceToPlayer <= chaseRange)
+    if (isEnemyDead)
     {
-        direction.Normalize();
-        rb.linearVelocity = direction * movespeed;
-    }
-    else
-    {
-        rb.linearVelocity = Vector3.zero;
+        Debug.Log("Enemy died!");
+        Destroy(gameObject);
     }
 }
-
-    private void attackPlayer()
-    {
-        // Implement logic to attack the player
-    }
-
-    private void Update()
-    {
-        // Call chase and attack methods based on conditions
-        attackPlayer();
-    }
 }
